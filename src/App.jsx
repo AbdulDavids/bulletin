@@ -10,16 +10,24 @@ const firebaseConfig = {
   // Your Firebase configuration object here
   apiKey: "AIzaSyD8oDcmAz1I2bb7i_SRCxlBvXvS2KQRjsc",
   authDomain: "twitter-acb56.firebaseapp.com",
-  projectId: "twitter-acb56"
+  projectId: "twitter-acb56",
 };
+//------------------------------------------------------------------
 
 // Initialize the Firebase app with the config object
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
+//------------------------------------------------------------------
+
 const auth = firebase.auth();
 const firestore = firebase.firestore();
+
+//------------------------------------------------------------------
+
+//------------------------------------------------------------------
+//------------------------------------------------------------------
 
 const App = () => {
   const [user] = useAuthState(auth);
@@ -62,15 +70,22 @@ const App = () => {
   };
 
   const handleAddTweet = async () => {
-    if (tweet.trim() !== "") {
-      await firestore.collection("tweets").add({
-        content: tweet,
-        userId: user.uid,
-        userName: user.displayName,
-        createdAt: new Date(),
-      });
-      setTweet("");
+    if (tweet.trim() === "") {
+      return; // Do not submit an empty tweet
     }
+
+    if (tweet.length < 10 || tweet.length > 140) {
+      alert("Tweet must be between 10 and 140 characters.");
+      return; // Do not submit if the tweet length is not within the allowed range
+    }
+
+    await firestore.collection("tweets").add({
+      content: tweet,
+      userId: user.uid,
+      userName: user.displayName,
+      createdAt: new Date(),
+    });
+    setTweet("");
   };
 
   const toggleNightMode = () => {
@@ -83,7 +98,8 @@ const App = () => {
         <div className="intro">
           <h1>Welcome to Twitter 2.0 </h1>
           <p>
-            Sign in to start tweeting and see what others are tweeting about! <br></br>
+            Sign in to start tweeting and see what others are tweeting about!{" "}
+            <br></br>
             <span>(Elon pls dont kill me.)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
@@ -95,7 +111,7 @@ const App = () => {
       {user && (
         <>
           <header className="header">
-            <h1 >Twitter 2.0</h1>
+            <h1>Twitter 2.0</h1>
             <div className="header-buttons">
               <button className="btn-github">
                 <a
@@ -137,7 +153,19 @@ const App = () => {
               <CSSTransition key={tweet.id} timeout={300} classNames="tweet">
                 <div className="tweet">
                   <div className="tweet-content">{tweet.content}</div>
-                  <div className="tweet-user">- @{tweet.userName}</div>
+
+                  <div className="user-and-time">
+                    <div className="tweet-user">@{tweet.userName}</div>
+                    <div className="tweet-time">
+                      {new Date(tweet.createdAt.toDate()).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </div>
+                  </div>
                 </div>
               </CSSTransition>
             ))}
