@@ -1,0 +1,212 @@
+/* src/styles.css */
+
+/* Reset default margin and padding */
+body,
+html,
+#root {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+
+}
+
+/* Set a background color for the body */
+body {
+  background-color: #f7f7f7;
+  font-family: "Segoe UI", sans-serif;
+  color: #333;
+  transition: background-color 0.05s, color 0.05s;
+
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  transition: background-color 0.05s, color 0.05s;
+
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: background-color 0.05s;
+
+}
+
+.header h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.btn-signin,
+.btn-signout,
+.btn-night-mode,
+.btn-github {
+  background-color: #1da1f2;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
+
+.btn-signout {
+  background-color: #ff4500;
+  margin-left: 10px;
+}
+
+.tweet-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tweet-input {
+  width: 100%;
+  resize: none;
+  border: none;
+  background-color: #f7f7f7;
+  color: #333;
+  font-size: 16px;
+  padding: auto;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", sans-serif;
+
+}
+
+.btn-tweet {
+  background-color: #1da1f2;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.tweet {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tweet-content {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.tweet-user {
+  font-size: 14px;
+  color: #888;
+}
+
+/* Night mode styles */
+.night-mode {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.night-mode .header h1,
+.night-mode .tweet-content,
+.night-mode .tweet-user {
+  color: #ffffff;
+}
+
+.night-mode .tweet-user {
+  color: #888;
+}
+
+.night-mode .btn-signin,
+.night-mode .btn-signout,
+.night-mode .btn-night-mode,
+.night-mode .tweet-container,
+.night-mode .tweet,
+.night-mode .btn-github{
+  background-color: #343a40;
+  box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .tweet-input {
+  background-color: #222;
+  color: #ffffff;
+}
+
+
+.btn-night-mode,
+.btn-signin,
+.btn-signout,
+.btn-github {
+  transition: background-color 0.05s;
+}
+
+.tweet-container,
+.tweet,
+.tweet-input {
+  transition: background-color 0.05s, box-shadow 0.05s;
+}
+
+
+/* Icons */
+.fa-sun:before {
+  content: "\f185";
+}
+
+.fa-moon:before {
+  content: "\f186";
+}
+
+/* Font Awesome */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
+
+/* src/styles.css */
+
+/* ... (previous styles) */
+
+/* Add animations */
+.tweet-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.tweet-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.tweet-exit {
+  opacity: 1;
+}
+
+.tweet-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+.btn-github {
+
+  padding: 8px 16px;
+  margin-right: 10px;
+}
+
+.btn-github a {
+  color: #fff;
+  text-decoration: none;
+}
+
+
