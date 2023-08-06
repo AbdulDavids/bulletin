@@ -188,9 +188,9 @@ const App = () => {
     setIsNightMode((prevMode) => !prevMode);
   };
 
-  const handleGitHubLink = () => {
-    window.open("https://github.com/your-github-username", "_blank");
-  };
+  //const handleGitHubLink = () => {
+    //window.open("https://github.com/your-github-username", "_blank");
+//};
 
   return (
     <div className={`container ${isNightMode ? "night-mode" : ""}`}>
