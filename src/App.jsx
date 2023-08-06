@@ -4,30 +4,23 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { format, startOfDay, subDays } from "date-fns";
 import "./styles.css";
 
 const firebaseConfig = {
   // Your Firebase configuration object here
   apiKey: "AIzaSyD8oDcmAz1I2bb7i_SRCxlBvXvS2KQRjsc",
   authDomain: "twitter-acb56.firebaseapp.com",
-  projectId: "twitter-acb56",
+  projectId: "twitter-acb56"
 };
-//------------------------------------------------------------------
 
 // Initialize the Firebase app with the config object
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-//------------------------------------------------------------------
-
 const auth = firebase.auth();
 const firestore = firebase.firestore();
-
-//------------------------------------------------------------------
-
-//------------------------------------------------------------------
-//------------------------------------------------------------------
 
 const App = () => {
   const [user] = useAuthState(auth);
@@ -36,6 +29,33 @@ const App = () => {
   const [isNightMode, setIsNightMode] = useState(false);
 
   useEffect(() => {
+    // Check and delete tweets created the day before (SAST time) on page load
+    if (user) {
+      const sastTimezone = "Africa/Johannesburg"; // Set the SAST timezone
+      const todaySast = startOfDay(new Date());
+      const yesterdaySast = subDays(todaySast, 1);
+      const yesterdaySastString = format(yesterdaySast, "yyyy-MM-dd", {
+        timeZone: sastTimezone,
+      });
+
+      firestore.collection("tweets").onSnapshot((snapshot) => {
+        snapshot.docs.forEach((doc) => {
+          const tweet = doc.data();
+          const createdAtSast = format(
+            tweet.createdAt.toDate(),
+            "yyyy-MM-dd",
+            { timeZone: sastTimezone }
+          );
+          if (createdAtSast === yesterdaySastString) {
+            firestore.collection("tweets").doc(doc.id).delete();
+          }
+        });
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Load tweets when the user is authenticated
     if (user) {
       const unsubscribe = firestore
         .collection("tweets")
@@ -53,6 +73,7 @@ const App = () => {
   }, [user]);
 
   useEffect(() => {
+    // Apply night mode when the state changes
     if (isNightMode) {
       document.body.classList.add("night-mode");
     } else {
@@ -71,12 +92,12 @@ const App = () => {
 
   const handleAddTweet = async () => {
     if (tweet.trim() === "") {
-      return; // Do not submit an empty tweet
+      return;
     }
 
-    if (tweet.length < 10 || tweet.length > 140) {
-      alert("Tweet must be between 10 and 140 characters.");
-      return; // Do not submit if the tweet length is not within the allowed range
+    if (tweet.length < 20 || tweet.length > 140) {
+      alert("Tweet must be between 20 and 140 characters.");
+      return;
     }
 
     await firestore.collection("tweets").add({
@@ -92,10 +113,17 @@ const App = () => {
     setIsNightMode((prevMode) => !prevMode);
   };
 
+  const handleGitHubLink = () => {
+    window.open("https://github.com/abduldavids", "_blank");
+  };
+
+  //const showMore = () => {window.open("https://github.com/your-github-username", "_blank");};
+
   return (
     <div className={`container ${isNightMode ? "night-mode" : ""}`}>
       {!user && (
         <div className="intro">
+          
           <h1>Welcome to Twitter 2.0 </h1>
           <p>
             Sign in to start tweeting and see what others are tweeting about!{" "}
@@ -113,24 +141,27 @@ const App = () => {
           <header className="header">
             <h1>Twitter 2.0</h1>
             <div className="header-buttons">
-              <button className="btn-github">
-                <a
-                  href="https://abduldavids.github.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GitHub
-                </a>
-              </button>
               <button className="btn-night-mode" onClick={toggleNightMode}>
                 {isNightMode ? (
                   <i className="fas fa-sun"></i>
                 ) : (
                   <i className="fas fa-moon"></i>
                 )}
+                
+              </button>
+
+              {/* <button className="btn-night-mode" onClick={showMore}>
+              <i class="fa-solid fa-info"></i>                
+              </button> */}
+
+
+              <button className="btn-github" onClick={handleGitHubLink}>
+                <i className="fab fa-github"></i>
+                
               </button>
               <button className="btn-signout" onClick={signOut}>
-                Sign Out
+              <i class="fa-solid fa-right-to-bracket"></i>
+                
               </button>
             </div>
           </header>
@@ -138,10 +169,9 @@ const App = () => {
           <div className="tweet-container">
             <textarea
               className="tweet-input"
-              rows="3"
+              placeholder="What's happening? (140 character limit btw)"
               value={tweet}
               onChange={(e) => setTweet(e.target.value)}
-              placeholder="What's happening? (140 character limit btw)"
             />
             <button className="btn-tweet" onClick={handleAddTweet}>
               Tweet
@@ -153,9 +183,8 @@ const App = () => {
               <CSSTransition key={tweet.id} timeout={300} classNames="tweet">
                 <div className="tweet">
                   <div className="tweet-content">{tweet.content}</div>
-
                   <div className="user-and-time">
-                    <div className="tweet-user">@{tweet.userName}</div>
+                    <div className="tweet-user">- @{tweet.userName}</div>
                     <div className="tweet-time">
                       {new Date(tweet.createdAt.toDate()).toLocaleTimeString(
                         [],
