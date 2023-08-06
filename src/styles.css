@@ -80,7 +80,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   margin-right: 10px;
-
+  margin-left: 10px;
 }
 
 .tweet-container {
@@ -267,3 +267,110 @@ body {
 }
 
 
+/* styles.css */
+
+/* ... (previous CSS) */
+
+/* styles.css */
+
+/* ... (previous CSS) */
+
+.tweet-container {
+  display: flex;
+  flex-direction: column;
+  
+}
+
+.tweet-options {
+  display: flex;
+  
+  margin-top: 10px;
+  
+}
+
+.tweet-checkbox {
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.tweet-checkbox input {
+  margin-right: 5px;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.tweet-checkbox input:checked {
+  border-color: #1da1f2;
+}
+
+.tweet-checkbox input::before {
+  content: "\f00c"; /* Font Awesome checkmark icon */
+  font-family: "Font Awesome 5 Free";
+  display: inline-block;
+  font-weight: bold;
+  font-size: 14px;
+  color: #1da1f2;
+  visibility: hidden;
+  transition: visibility 0.2s ease-in-out;
+}
+
+.tweet-checkbox input:checked::before {
+  visibility: visible;
+}
+
+/* ... */
+
+/* styles.css */
+
+/* ... Your existing CSS styles ... */
+
+.tweet {
+  position: relative;
+
+  border-radius: 5px;
+  margin: 1rem 1;
+  background-color: #fff;
+}
+
+.tweet-content {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.user-and-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #888;
+}
+
+.tweet-menu {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.tweet-menu-button {
+  padding: 0.5rem;
+  border: none;
+  background-color: transparent;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.tweet-menu-button:hover {
+  color: #ff4f4f;
+}
+
+/* ... Your existing CSS styles ... */

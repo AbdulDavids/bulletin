@@ -5,13 +5,18 @@ import "firebase/compat/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { format, startOfDay, subDays } from "date-fns";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTrashAlt,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons";
 import "./styles.css";
 
 const firebaseConfig = {
   // Your Firebase configuration object here
   apiKey: "AIzaSyD8oDcmAz1I2bb7i_SRCxlBvXvS2KQRjsc",
   authDomain: "twitter-acb56.firebaseapp.com",
-  projectId: "twitter-acb56"
+  projectId: "twitter-acb56",
 };
 
 // Initialize the Firebase app with the config object
@@ -22,11 +27,72 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
+const TweetCard = ({ tweet, isCurrentUser }) => {
+  const handleDeleteTweet = async (tweetId) => {
+    try {
+      await firestore.collection("tweets").doc(tweetId).delete();
+    } catch (error) {
+      console.error("Error deleting tweet:", error);
+    }
+  };
+
+  const handleReportTweet = async (tweetId, reportCount) => {
+    try {
+      if (reportCount >= 2) {
+        await handleDeleteTweet(tweetId);
+      } else {
+        await firestore
+          .collection("tweets")
+          .doc(tweetId)
+          .update({
+            reportCount: firebase.firestore.FieldValue.increment(1),
+          });
+      }
+    } catch (error) {
+      console.error("Error reporting tweet:", error);
+    }
+  };
+
+  return (
+    <div className="tweet">
+      <div className="tweet-content">{tweet.content}</div>
+      <div className="user-and-time">
+        <div className="tweet-user">- @{tweet.userName}</div>
+
+        <div className="tweet-menu">
+          {isCurrentUser && (
+            <button
+              className="tweet-menu-button"
+              onClick={() => handleDeleteTweet(tweet.id)}
+            >
+              <FontAwesomeIcon icon={faTrashAlt} />
+            </button>
+          )}
+          <button
+            className="tweet-menu-button"
+            onClick={() => handleReportTweet(tweet.id, tweet.reportCount || 0)}
+          >
+            <FontAwesomeIcon icon={faExclamationTriangle} />
+          </button>
+        </div>
+
+        <div className="tweet-time">
+          {new Date(tweet.createdAt.toDate()).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   const [user] = useAuthState(auth);
   const [tweet, setTweet] = useState("");
   const [tweets, setTweets] = useState([]);
   const [isNightMode, setIsNightMode] = useState(false);
+  const [showFullUsername, setShowFullUsername] = useState(true);
 
   useEffect(() => {
     // Check and delete tweets created the day before (SAST time) on page load
@@ -41,11 +107,9 @@ const App = () => {
       firestore.collection("tweets").onSnapshot((snapshot) => {
         snapshot.docs.forEach((doc) => {
           const tweet = doc.data();
-          const createdAtSast = format(
-            tweet.createdAt.toDate(),
-            "yyyy-MM-dd",
-            { timeZone: sastTimezone }
-          );
+          const createdAtSast = format(tweet.createdAt.toDate(), "yyyy-MM-dd", {
+            timeZone: sastTimezone,
+          });
           if (createdAtSast === yesterdaySastString) {
             firestore.collection("tweets").doc(doc.id).delete();
           }
@@ -95,16 +159,27 @@ const App = () => {
       return;
     }
 
-    if (tweet.length < 20 || tweet.length > 140) {
-      alert("Tweet must be between 20 and 140 characters.");
+    if (tweet.length < 15 || tweet.length > 200) {
+      alert("Tweet must be between 15 and 140 characters.");
       return;
+    }
+
+    let userName = user.displayName;
+    if (!showFullUsername && userName) {
+      // Get initials if showFullUsername is false
+      const initials = userName
+        .split(" ")
+        .map((name) => name.charAt(0))
+        .join("");
+      userName = initials.toUpperCase();
     }
 
     await firestore.collection("tweets").add({
       content: tweet,
       userId: user.uid,
-      userName: user.displayName,
+      userName,
       createdAt: new Date(),
+      reportCount: 0, // Initialize reportCount to 0
     });
     setTweet("");
   };
@@ -114,21 +189,18 @@ const App = () => {
   };
 
   const handleGitHubLink = () => {
-    window.open("https://github.com/abduldavids", "_blank");
+    window.open("https://github.com/your-github-username", "_blank");
   };
-
-  //const showMore = () => {window.open("https://github.com/your-github-username", "_blank");};
 
   return (
     <div className={`container ${isNightMode ? "night-mode" : ""}`}>
       {!user && (
         <div className="intro">
-          
-          <h1>Welcome to Twitter 2.0 </h1>
+          <h1>Welcome to Twitter 2.0</h1>
           <p>
-            Sign in to start tweeting and see what others are tweeting about!{" "}
-            <br></br>
-            <span>(Elon pls dont kill me.)</span>
+            Sign in to start tweeting and see what others are tweeting about! {" "}
+            <br />
+            <span>(Note: Tweets are now auto deleted every 24 hours)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
@@ -147,21 +219,14 @@ const App = () => {
                 ) : (
                   <i className="fas fa-moon"></i>
                 )}
-                
               </button>
 
-              {/* <button className="btn-night-mode" onClick={showMore}>
-              <i class="fa-solid fa-info"></i>                
+              {/*<button className="btn-github" onClick={handleGitHubLink}>
+                <i className="fab fa-github"></i>
               </button> */}
 
-
-              <button className="btn-github" onClick={handleGitHubLink}>
-                <i className="fab fa-github"></i>
-                
-              </button>
               <button className="btn-signout" onClick={signOut}>
-              <i class="fa-solid fa-right-to-bracket"></i>
-                
+                <i className="fas fa-sign-out-alt"></i>
               </button>
             </div>
           </header>
@@ -169,33 +234,32 @@ const App = () => {
           <div className="tweet-container">
             <textarea
               className="tweet-input"
-              placeholder="What's happening? (140 character limit btw)"
+              placeholder="What's happening? (200 character limit btw)"
               value={tweet}
               onChange={(e) => setTweet(e.target.value)}
             />
-            <button className="btn-tweet" onClick={handleAddTweet}>
-              Tweet
-            </button>
+            <div className="tweet-options">
+              <button className="btn-tweet" onClick={handleAddTweet}>
+                Tweet
+              </button>
+              <label className="tweet-checkbox">
+                <input
+                  type="checkbox"
+                  checked={showFullUsername}
+                  onChange={() => setShowFullUsername(!showFullUsername)}
+                />
+                Display Name
+              </label>
+            </div>
           </div>
 
           <TransitionGroup>
             {tweets.map((tweet) => (
               <CSSTransition key={tweet.id} timeout={300} classNames="tweet">
-                <div className="tweet">
-                  <div className="tweet-content">{tweet.content}</div>
-                  <div className="user-and-time">
-                    <div className="tweet-user">- @{tweet.userName}</div>
-                    <div className="tweet-time">
-                      {new Date(tweet.createdAt.toDate()).toLocaleTimeString(
-                        [],
-                        {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <TweetCard
+                  tweet={tweet}
+                  isCurrentUser={tweet.userId === user.uid}
+                />
               </CSSTransition>
             ))}
           </TransitionGroup>
