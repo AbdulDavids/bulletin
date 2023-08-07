@@ -11,6 +11,9 @@ import {
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 import "./styles.css";
+import { faTwitter } from "@fortawesome/free-brands-svg-icons";
+import ChangeLog from "./ChangeLog";
+
 
 const firebaseConfig = {
   // Your Firebase configuration object here
@@ -28,6 +31,26 @@ const auth = firebase.auth();
 const firestore = firebase.firestore();
 
 const TweetCard = ({ tweet, isCurrentUser }) => {
+  const [reportedUsers, setReportedUsers] = useState([]);
+
+  useEffect(() => {
+    // Get the list of reported users for this tweet
+    const getReportedUsers = async () => {
+      try {
+        const tweetDoc = await firestore
+          .collection("tweets")
+          .doc(tweet.id)
+          .get();
+        const data = tweetDoc.data();
+        setReportedUsers(data.reportedUsers || []);
+      } catch (error) {
+        console.error("Error getting reported users:", error);
+      }
+    };
+
+    getReportedUsers();
+  }, [tweet]);
+
   const handleDeleteTweet = async (tweetId) => {
     try {
       await firestore.collection("tweets").doc(tweetId).delete();
@@ -36,17 +59,19 @@ const TweetCard = ({ tweet, isCurrentUser }) => {
     }
   };
 
-  const handleReportTweet = async (tweetId, reportCount) => {
+  const handleReportTweet = async (tweetId) => {
     try {
-      if (reportCount >= 2) {
-        await handleDeleteTweet(tweetId);
-      } else {
-        await firestore
-          .collection("tweets")
-          .doc(tweetId)
-          .update({
-            reportCount: firebase.firestore.FieldValue.increment(1),
-          });
+      // Check if the current user has already reported this tweet
+      if (!reportedUsers.includes(auth.currentUser.uid)) {
+        const updatedReportedUsers = [...reportedUsers, auth.currentUser.uid];
+        await firestore.collection("tweets").doc(tweetId).update({
+          reportedUsers: updatedReportedUsers,
+        });
+
+        // If the tweet has been reported by 3 different users, delete it
+        if (updatedReportedUsers.length >= 3) {
+          await handleDeleteTweet(tweetId);
+        }
       }
     } catch (error) {
       console.error("Error reporting tweet:", error);
@@ -58,7 +83,6 @@ const TweetCard = ({ tweet, isCurrentUser }) => {
       <div className="tweet-content">{tweet.content}</div>
       <div className="user-and-time">
         <div className="tweet-user">- @{tweet.userName}</div>
-
         <div className="tweet-menu">
           {isCurrentUser && (
             <button
@@ -70,12 +94,11 @@ const TweetCard = ({ tweet, isCurrentUser }) => {
           )}
           <button
             className="tweet-menu-button"
-            onClick={() => handleReportTweet(tweet.id, tweet.reportCount || 0)}
+            onClick={() => handleReportTweet(tweet.id)}
           >
             <FontAwesomeIcon icon={faExclamationTriangle} />
           </button>
         </div>
-
         <div className="tweet-time">
           {new Date(tweet.createdAt.toDate()).toLocaleTimeString([], {
             hour: "2-digit",
@@ -160,7 +183,7 @@ const App = () => {
     }
 
     if (tweet.length < 15 || tweet.length > 200) {
-      alert("Tweet must be between 15 and 140 characters.");
+      alert("Tweet must be between 15 and 200 characters.");
       return;
     }
 
@@ -179,7 +202,7 @@ const App = () => {
       userId: user.uid,
       userName,
       createdAt: new Date(),
-      reportCount: 0, // Initialize reportCount to 0
+      reportedUsers: [], // Initialize reportedUsers array to track reports
     });
     setTweet("");
   };
@@ -188,30 +211,46 @@ const App = () => {
     setIsNightMode((prevMode) => !prevMode);
   };
 
-  //const handleGitHubLink = () => {
-    //window.open("https://github.com/your-github-username", "_blank");
-//};
-
   return (
     <div className={`container ${isNightMode ? "night-mode" : ""}`}>
       {!user && (
+
+        
         <div className="intro">
+          <div className="title-logo" >
+          <FontAwesomeIcon icon={faTwitter} className="twitter-logo" />
           <h1>Welcome to Twitter 2.0</h1>
+          </div>
+        
+
+
           <p>
-            Sign in to start tweeting and see what others are tweeting about! {" "}
+            Sign in to start tweeting and see what others are tweeting about!{" "}
             <br />
-            <span>(Note: Tweets are now auto deleted every 24 hours)</span>
+            <span>(Note: Tweets are now auto deleted every 48 hours)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
           </button>
+
+
+          <div className="change-log-container">
+          <ChangeLog />
+        </div>
         </div>
       )}
 
       {user && (
         <>
           <header className="header">
-            <h1>Twitter 2.0</h1>
+            <div className="title-logo"><FontAwesomeIcon
+              icon={faTwitter}
+              className={`twitter-logo ${isNightMode ? "night-mode" : ""}`}
+            /><h1>Twitter 2.0</h1>
+            
+            
+             </div>
+            
             <div className="header-buttons">
               <button className="btn-night-mode" onClick={toggleNightMode}>
                 {isNightMode ? (
@@ -238,6 +277,8 @@ const App = () => {
               value={tweet}
               onChange={(e) => setTweet(e.target.value)}
             />
+
+            <div className="tweet-box">
             <div className="tweet-options">
               <button className="btn-tweet" onClick={handleAddTweet}>
                 Tweet
@@ -250,7 +291,19 @@ const App = () => {
                 />
                 Display Name
               </label>
+
+              
+
+
             </div>
+            <div className="delete-message">
+                Tweets are deleted after 24 hours
+              </div>
+
+              </div>
+
+
+
           </div>
 
           <TransitionGroup>
