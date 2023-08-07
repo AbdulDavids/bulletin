@@ -14,12 +14,11 @@ import "./styles.css";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
 import ChangeLog from "./ChangeLog";
 
-
 const firebaseConfig = {
   // Your Firebase configuration object here
   apiKey: "AIzaSyD8oDcmAz1I2bb7i_SRCxlBvXvS2KQRjsc",
   authDomain: "twitter-acb56.firebaseapp.com",
-  projectId: "twitter-acb56",
+  projectId: "twitter-acb56"
 };
 
 // Initialize the Firebase app with the config object
@@ -30,17 +29,15 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
-const TweetCard = ({ tweet, isCurrentUser }) => {
+// Component for displaying each tweet
+function TweetCard({ tweet, isCurrentUser }) {
   const [reportedUsers, setReportedUsers] = useState([]);
 
   useEffect(() => {
     // Get the list of reported users for this tweet
     const getReportedUsers = async () => {
       try {
-        const tweetDoc = await firestore
-          .collection("tweets")
-          .doc(tweet.id)
-          .get();
+        const tweetDoc = await firestore.collection("tweets").doc(tweet.id).get();
         const data = tweetDoc.data();
         setReportedUsers(data.reportedUsers || []);
       } catch (error) {
@@ -51,32 +48,32 @@ const TweetCard = ({ tweet, isCurrentUser }) => {
     getReportedUsers();
   }, [tweet]);
 
-  const handleDeleteTweet = async (tweetId) => {
+  function handleDeleteTweet(tweetId) {
     try {
-      await firestore.collection("tweets").doc(tweetId).delete();
+      firestore.collection("tweets").doc(tweetId).delete();
     } catch (error) {
       console.error("Error deleting tweet:", error);
     }
-  };
+  }
 
-  const handleReportTweet = async (tweetId) => {
+  function handleReportTweet(tweetId) {
     try {
       // Check if the current user has already reported this tweet
       if (!reportedUsers.includes(auth.currentUser.uid)) {
         const updatedReportedUsers = [...reportedUsers, auth.currentUser.uid];
-        await firestore.collection("tweets").doc(tweetId).update({
+        firestore.collection("tweets").doc(tweetId).update({
           reportedUsers: updatedReportedUsers,
         });
 
         // If the tweet has been reported by 3 different users, delete it
         if (updatedReportedUsers.length >= 3) {
-          await handleDeleteTweet(tweetId);
+          handleDeleteTweet(tweetId);
         }
       }
     } catch (error) {
       console.error("Error reporting tweet:", error);
     }
-  };
+  }
 
   return (
     <div className="tweet">
@@ -108,9 +105,22 @@ const TweetCard = ({ tweet, isCurrentUser }) => {
       </div>
     </div>
   );
-};
+}
 
-const App = () => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+function App() {
   const [user] = useAuthState(auth);
   const [tweet, setTweet] = useState("");
   const [tweets, setTweets] = useState([]);
@@ -168,16 +178,16 @@ const App = () => {
     }
   }, [isNightMode]);
 
-  const signInWithGoogle = () => {
+  function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);
-  };
+  }
 
-  const signOut = () => {
+  function signOut() {
     auth.signOut();
-  };
+  }
 
-  const handleAddTweet = async () => {
+  function handleAddTweet() {
     if (tweet.trim() === "") {
       return;
     }
@@ -197,7 +207,7 @@ const App = () => {
       userName = initials.toUpperCase();
     }
 
-    await firestore.collection("tweets").add({
+    firestore.collection("tweets").add({
       content: tweet,
       userId: user.uid,
       userName,
@@ -205,52 +215,44 @@ const App = () => {
       reportedUsers: [], // Initialize reportedUsers array to track reports
     });
     setTweet("");
-  };
+  }
 
-  const toggleNightMode = () => {
+  function toggleNightMode() {
     setIsNightMode((prevMode) => !prevMode);
-  };
+  }
 
   return (
     <div className={`container ${isNightMode ? "night-mode" : ""}`}>
       {!user && (
-
-        
         <div className="intro">
-          <div className="title-logo" >
-          <FontAwesomeIcon icon={faTwitter} className="twitter-logo" />
-          <h1>Welcome to Twitter 2.0</h1>
+          <div className="title-logo">
+            <FontAwesomeIcon icon={faTwitter} className="twitter-logo" />
+            <h1>Welcome to Twitter 2.0</h1>
           </div>
-        
-
-
           <p>
             Sign in to start tweeting and see what others are tweeting about!{" "}
             <br />
-            <span>(Note: Tweets are now auto deleted every 48 hours)</span>
+            <span>(Note: Tweets are now auto-deleted every 48 hours)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
           </button>
-
-
           <div className="change-log-container">
-          <ChangeLog />
-        </div>
+            <ChangeLog />
+          </div>
         </div>
       )}
 
       {user && (
         <>
           <header className="header">
-            <div className="title-logo"><FontAwesomeIcon
-              icon={faTwitter}
-              className={`twitter-logo ${isNightMode ? "night-mode" : ""}`}
-            /><h1>Twitter 2.0</h1>
-            
-            
-             </div>
-            
+            <div className="title-logo">
+              <FontAwesomeIcon
+                icon={faTwitter}
+                className={`twitter-logo ${isNightMode ? "night-mode" : ""}`}
+              />
+              <h1>Twitter 2.0</h1>
+            </div>
             <div className="header-buttons">
               <button className="btn-night-mode" onClick={toggleNightMode}>
                 {isNightMode ? (
@@ -259,11 +261,9 @@ const App = () => {
                   <i className="fas fa-moon"></i>
                 )}
               </button>
-
               {/*<button className="btn-github" onClick={handleGitHubLink}>
                 <i className="fab fa-github"></i>
               </button> */}
-
               <button className="btn-signout" onClick={signOut}>
                 <i className="fas fa-sign-out-alt"></i>
               </button>
@@ -277,33 +277,24 @@ const App = () => {
               value={tweet}
               onChange={(e) => setTweet(e.target.value)}
             />
-
             <div className="tweet-box">
-            <div className="tweet-options">
-              <button className="btn-tweet" onClick={handleAddTweet}>
-                Tweet
-              </button>
-              <label className="tweet-checkbox">
-                <input
-                  type="checkbox"
-                  checked={showFullUsername}
-                  onChange={() => setShowFullUsername(!showFullUsername)}
-                />
-                Display Name
-              </label>
-
-              
-
-
-            </div>
-            <div className="delete-message">
+              <div className="tweet-options">
+                <button className="btn-tweet" onClick={handleAddTweet}>
+                  Tweet
+                </button>
+                <label className="tweet-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={showFullUsername}
+                    onChange={() => setShowFullUsername(!showFullUsername)}
+                  />
+                  Show Name
+                </label>
+              </div>
+              <div className="delete-message">
                 Tweets are deleted after 24 hours
               </div>
-
-              </div>
-
-
-
+            </div>
           </div>
 
           <TransitionGroup>
@@ -320,6 +311,6 @@ const App = () => {
       )}
     </div>
   );
-};
+}
 
 export default App;
