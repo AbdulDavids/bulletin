@@ -80,7 +80,7 @@ function TweetCard({ tweet, isCurrentUser }) {
     <div className="tweet">
       <div className="tweet-content">{tweet.content}</div>
       <div className="user-and-time">
-        <div className="tweet-user">- @{tweet.userName}</div>
+        <div className="tweet-user">{tweet.userName}</div>
         <div className="tweet-menu">
           {isCurrentUser && (
             <button
