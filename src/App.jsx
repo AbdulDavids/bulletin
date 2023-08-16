@@ -12,13 +12,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "./styles.css";
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
+import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import ChangeLog from "./ChangeLog";
 
 const firebaseConfig = {
   // Your Firebase configuration object here
-  apiKey: "AIzaSyD8oDcmAz1I2bb7i_SRCxlBvXvS2KQRjsc",
-  authDomain: "twitter-acb56.firebaseapp.com",
-  projectId: "twitter-acb56"
+  apiKey: "AIzaSyArCfeJR3WgeAfgtrP45LxwlMataNz8Bzs",
+  authDomain: "vc-bulletin.firebaseapp.com",
+  projectId: "vc-bulletin"
 };
 
 // Initialize the Firebase app with the config object
@@ -193,18 +194,14 @@ function App() {
     }
 
     if (tweet.length < 15 || tweet.length > 200) {
-      alert("Tweet must be between 15 and 200 characters.");
+      alert("Note must be between 15 and 200 characters.");
       return;
     }
 
     let userName = user.displayName;
     if (!showFullUsername && userName) {
-      // Get initials if showFullUsername is false
-      const initials = userName
-        .split(" ")
-        .map((name) => name.charAt(0))
-        .join("");
-      userName = initials.toUpperCase();
+      
+      userName = "Anonymous"
     }
 
     firestore.collection("tweets").add({
@@ -226,13 +223,16 @@ function App() {
       {!user && (
         <div className="intro">
           <div className="title-logo">
-            <FontAwesomeIcon icon={faTwitter} className="twitter-logo" />
-            <h1>Welcome to Twitter 2.0</h1>
+          <FontAwesomeIcon
+                icon={faMessage}
+                className={`twitter-logo ${isNightMode ? "night-mode" : ""}`}
+              />
+            <h1>Welcome to Bulletin</h1>
           </div>
           <p>
-            Sign in to start tweeting and see what others are tweeting about!{" "}
+            Bulletin is a virtual bulletin board where you can anonymously share your current thoughts with the world.{" "}
             <br />
-            <span>(Note: Tweets are now auto-deleted every 48 hours)</span>
+            <span>(Notes are auto-deleted every 24 hours)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
@@ -248,10 +248,10 @@ function App() {
           <header className="header">
             <div className="title-logo">
               <FontAwesomeIcon
-                icon={faTwitter}
+                icon={faMessage}
                 className={`twitter-logo ${isNightMode ? "night-mode" : ""}`}
               />
-              <h1>Twitter 2.0</h1>
+              <h1>Bulletin</h1>
             </div>
             <div className="header-buttons">
               <button className="btn-night-mode" onClick={toggleNightMode}>
@@ -273,14 +273,14 @@ function App() {
           <div className="tweet-container">
             <textarea
               className="tweet-input"
-              placeholder="What's happening? (200 character limit btw)"
+              placeholder="Write a note"
               value={tweet}
               onChange={(e) => setTweet(e.target.value)}
             />
             <div className="tweet-box">
               <div className="tweet-options">
                 <button className="btn-tweet" onClick={handleAddTweet}>
-                  Tweet
+                  Pin
                 </button>
                 <label className="tweet-checkbox">
                   <input
@@ -292,7 +292,7 @@ function App() {
                 </label>
               </div>
               <div className="delete-message">
-                Tweets are deleted after 24 hours
+                Notes are deleted after 24 hours
               </div>
             </div>
           </div>
