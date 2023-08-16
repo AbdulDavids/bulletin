@@ -8,7 +8,6 @@ const ChangeLog = () => {
         "v.1.3",
         "Added report button. Tweets are now deleted after 3 reports",
         "Added changelog",
-        "Changed Auto Delete to 48 hours",
         "Added Logo (Elon dont kill me pls)",
         "Visual Tweaks"
       ],
