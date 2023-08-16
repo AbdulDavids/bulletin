@@ -127,30 +127,29 @@ function App() {
   const [isNightMode, setIsNightMode] = useState(false);
   const [showFullUsername, setShowFullUsername] = useState(true);
 
-
-useEffect(() => {
-  // Check and delete tweets created the month before (SAST time) on page load
-  if (user) {
-    const sastTimezone = "Africa/Johannesburg"; // Set the SAST timezone
-    const todaySast = startOfDay(new Date());
-    const lastMonthSast = subMonths(todaySast, 1);
-    const lastMonthSastString = format(lastMonthSast, "yyyy-MM", {
-      timeZone: sastTimezone,
-    });
-
-    firestore.collection("tweets").onSnapshot((snapshot) => {
-      snapshot.docs.forEach((doc) => {
-        const tweet = doc.data();
-        const createdAtSast = format(tweet.createdAt.toDate(), "yyyy-MM", {
-          timeZone: sastTimezone,
-        });
-        if (createdAtSast === lastMonthSastString) {
-          firestore.collection("tweets").doc(doc.id).delete();
-        }
+  useEffect(() => {
+    // Check and delete tweets created the day before (SAST time) on page load
+    if (user) {
+      const sastTimezone = "Africa/Johannesburg"; // Set the SAST timezone
+      const todaySast = startOfDay(new Date());
+      const yesterdaySast = subDays(todaySast, 1);
+      const yesterdaySastString = format(yesterdaySast, "yyyy-MM-dd", {
+        timeZone: sastTimezone,
       });
-    });
-  }
-}, [user]);
+
+      firestore.collection("tweets").onSnapshot((snapshot) => {
+        snapshot.docs.forEach((doc) => {
+          const tweet = doc.data();
+          const createdAtSast = format(tweet.createdAt.toDate(), "yyyy-MM-dd", {
+            timeZone: sastTimezone,
+          });
+          if (createdAtSast === yesterdaySastString) {
+            firestore.collection("tweets").doc(doc.id).delete();
+          }
+        });
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     // Load tweets when the user is authenticated
@@ -233,7 +232,7 @@ useEffect(() => {
           <p>
             Sign in to start tweeting and see what others are tweeting about!{" "}
             <br />
-            <span>(Note: Tweets are now auto-deleted every month)</span>
+            <span>(Note: Tweets are now auto-deleted every 48 hours)</span>
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
@@ -293,7 +292,7 @@ useEffect(() => {
                 </label>
               </div>
               <div className="delete-message">
-                Tweets are deleted after 30 days
+                Tweets are deleted after 24 hours
               </div>
             </div>
           </div>
