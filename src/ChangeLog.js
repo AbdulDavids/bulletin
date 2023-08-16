@@ -2,6 +2,28 @@ import React from "react";
 
 const ChangeLog = () => {
   const changeLogItems = [
+
+    {
+      date: "August 14, 2023",
+      changes: [
+        "v.1.3",
+        "Changed Auto-Delete to one month due to inactivity",
+        
+
+      ],
+    },
+
+
+
+
+
+
+
+
+
+
+
+
     {
       date: "August 7, 2023",
       changes: [
