@@ -11,7 +11,7 @@ import {
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
 import "./styles.css";
-import { faTwitter } from "@fortawesome/free-brands-svg-icons";
+
 import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import ChangeLog from "./ChangeLog";
 
