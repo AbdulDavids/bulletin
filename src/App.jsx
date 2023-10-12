@@ -232,7 +232,7 @@ function App() {
           <p>
             Bulletin is a virtual bulletin board where you can anonymously share your current thoughts with the world.{" "}
             <br />
-            <span>(Notes are auto-deleted every 24 hours)</span>
+            
           </p>
           <button className="btn-signin" onClick={signInWithGoogle}>
             Sign In with Google
